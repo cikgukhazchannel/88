@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Untitled</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Markah Peperiksaan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .dashboard-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        .dashboard-card:hover {
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        .grade-A, .grade-A- {
+            background-color: #10B981;
+            color: white;
+        }
+        .grade-B\+, .grade-B, .grade-B- {
+            background-color: #3B82F6;
+            color: white;
+        }
+        .grade-C\+, .grade-C, .grade-C- {
+            background-color: #6366F1;
+            color: white;
+        }
+        .grade-D\+, .grade-D {
+            background-color: #F59E0B;
+            color: white;
+        }
+        .grade-F {
+            background-color: #EF4444;
+            color: white;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: #1E40AF;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #f1f5f9;
+        }
+        .grade-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            font-size: 0.75rem;
+            display: inline-block;
+            min-width: 2rem;
+            text-align: center;
+        }
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            background-color: #1E40AF;
+            color: white;
+        }
+        .tab-button:not(.active) {
+            background-color: #E2E8F0;
+            color: #475569;
+        }
+        .tab-button:not(.active):hover {
+            background-color: #CBD5E1;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen p-4 md:p-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Dashboard Markah Peperiksaan</h1>
+                    <p class="text-gray-600">MARKAH PEPERIKSAAN PERCUBAAN SEM 2 2025</p>
+                </div>
+                <div class="mt-4 md:mt-0">
+                    <select id="classFilter" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="all">Semua Kelas</option>
+                        <option value="TOLKIEN">TOLKIEN</option>
+                        <option value="ROWLING">ROWLING</option>
+                        <option value="HARLAND">HARLAND</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="dashboard-card p-6">
+                    <h3 class="text-gray-500 text-sm font-medium mb-1">Jumlah Pelajar</h3>
+                    <div class="flex items-center">
+                        <span class="text-3xl font-bold text-gray-800" id="totalStudents">56</span>
+                    </div>
+                </div>
+                <div class="dashboard-card p-6">
+                    <h3 class="text-gray-500 text-sm font-medium mb-1">Kadar Lulus PA 2</h3>
+                    <div class="flex items-center">
+                        <span class="text-3xl font-bold text-gray-800" id="passRatePA">16.1%</span>
+                    </div>
+                </div>
+                <div class="dashboard-card p-6">
+                    <h3 class="text-gray-500 text-sm font-medium mb-1">Kadar Lulus BM 2</h3>
+                    <div class="flex items-center">
+                        <span class="text-3xl font-bold text-gray-800" id="passRateBM">41.1%</span>
+                    </div>
+                </div>
+                <div class="dashboard-card p-6">
+                    <h3 class="text-gray-500 text-sm font-medium mb-1">Kadar Lulus SEJ 2</h3>
+                    <div class="flex items-center">
+                        <span class="text-3xl font-bold text-gray-800" id="passRateSEJ">35.7%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="dashboard-card p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Taburan Gred PA 2</h3>
+                    <div class="h-64">
+                        <canvas id="paGradeChart"></canvas>
+                    </div>
+                </div>
+                <div class="dashboard-card p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Taburan Gred BM 2</h3>
+                    <div class="h-64">
+                        <canvas id="bmGradeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="dashboard-card p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Taburan Gred SEJ 2</h3>
+                    <div class="h-64">
+                        <canvas id="sejGradeChart"></canvas>
+                    </div>
+                </div>
+                <div class="dashboard-card p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Perbandingan Kelas</h3>
+                    <div class="h-64">
+                        <canvas id="classComparisonChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="mb-2">
+                <div class="flex flex-wrap">
+                    <button class="tab-button active" data-tab="all">Semua Pelajar</button>
+                    <button class="tab-button" data-tab="tolkien">TOLKIEN</button>
+                    <button class="tab-button" data-tab="rowling">ROWLING</button>
+                    <button class="tab-button" data-tab="harland">HARLAND</button>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="dashboard-card">
+                <div class="tab-content active" id="all-tab">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>No.</th>
+                                    <th>Nama</th>
+                                    <th>Kelas</th>
+                                    <th>PA 2</th>
+                                    <th>Gred</th>
+                                    <th>BM 2</th>
+                                    <th>Gred</th>
+                                    <th>SEJ 2</th>
+                                    <th>Gred</th>
+                                    <th>PP 2</th>
+                                    <th>Gred</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allStudentsTable">
+                                <!-- Data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-content" id="tolkien-tab">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>No.</th>
+                                    <th>Nama</th>
+                                    <th>PA 2</th>
+                                    <th>Gred</th>
+                                    <th>BM 2</th>
+                                    <th>Gred</th>
+                                    <th>SEJ 2</th>
+                                    <th>Gred</th>
+                                    <th>PP 2</th>
+                                    <th>Gred</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tolkienStudentsTable">
+                                <!-- Data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-content" id="rowling-tab">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>No.</th>
+                                    <th>Nama</th>
+                                    <th>PA 2</th>
+                                    <th>Gred</th>
+                                    <th>BM 2</th>
+                                    <th>Gred</th>
+                                    <th>SEJ 2</th>
+                                    <th>Gred</th>
+                                    <th>PP 2</th>
+                                    <th>Gred</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rowlingStudentsTable">
+                                <!-- Data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-content" id="harland-tab">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>No.</th>
+                                    <th>Nama</th>
+                                    <th>PA 2</th>
+                                    <th>Gred</th>
+                                    <th>BM 2</th>
+                                    <th>Gred</th>
+                                    <th>SEJ 2</th>
+                                    <th>Gred</th>
+                                    <th>PP 2</th>
+                                    <th>Gred</th>
+                                </tr>
+                            </thead>
+                            <tbody id="harlandStudentsTable">
+                                <!-- Data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Student data
+        const studentsData = [
+            {id: 1, name: "ALONSO ANGGAU ANAK SELYWEN", class: "TOLKIEN", pa2: 17, paGrade: "F", bm2: 20, bmGrade: "F", sej2: 27, sejGrade: "F", pp2: "", ppGrade: "F"},
+            {id: 2, name: "ANDRIANNY MARSHANDA ANAK MACHA", class: "TOLKIEN", pa2: 3, paGrade: "F", bm2: 22, bmGrade: "F", sej2: 27, sejGrade: "F", pp2: "", ppGrade: "F"},
+            {id: 3, name: "EVANIA DEARA LAMPAI ANAK JULI", class: "TOLKIEN", pa2: 3, paGrade: "F", bm2: 15, bmGrade: "F", sej2: 12, sejGrade: "F", pp2: "", ppGrade: "F"},
+            {id: 4, name: "FRANCISKA ARABELLA ANAK DENIS", class: "TOLKIEN", pa2: 25, paGrade: "F", bm2: 47, bmGrade: "C+", sej2: 58, sejGrade: "B", pp2: "", ppGrade: "F"},
+            {id: 5, name: "FRED MALVINCE LIU SEE FEI", class: "TOLKIEN", pa2: 13, paGrade: "F", bm2: 18, bmGrade: "F", sej2: 25, sejGrade: "F", pp2: "", ppGrade: "F"},
+            {id: 6, name: "IVONNE DARREN MATHEW", class: "TOLKIEN", pa2: 18, paGrade: "F", bm2: 59, bmGrade: "B", sej2: 70, sejGrade: "A-", pp2: "", ppGrade: "F"},
+            {id: 7, name: "MARGARETTA ESTHER JERING ANAK ANYAI", class: "TOLKIEN", pa2: 27, paGrade: "F", bm2: 18, bmGrade: "F", sej2: 17, sejGrade: "F", pp2: "", ppGrade: "F"},
+            {id: 8, name: "MIA MARLYIANA ANAK BARAIN", class: "TOLKIEN", pa2: 43, paGrade: "C", bm2: 44, bmGrade: "C", sej2: 33, sejGrade: "D", pp2: "", ppGrade: "F"},
+            {id: 9, name: "NOR LASYA AINA BINTI ZAINOREIN", class: "TOLKIEN", pa2: 5, paGrade: "F", bm2: 15, bmGrade: "F", sej2: 22, sejGrade: "F", pp2: "", ppGrade: "F"},
+            {id: 10, name: "NUR AIN BINTI ADAM", class: "TOLKIEN", pa2: 27, paGrade: "F", bm2: 45, bmGrade: "C", sej2: 15, sejGrade: "F", pp2: "", ppGrade: "F"},
+            {id: 11, name: "NUR NAJIHA MOHD ZAIDI GARMOK SINGH", class: "TOLKIEN", pa2: 3, paGrade: "F", bm2: 20, bmGrade: "F", sej2: 40, sejGrade: "C", pp2: "", ppGrade: "F"},
+            {id: 12, name: "NURSYAZLYN BINTI DAHLAN", class: "TOLKIEN", pa2: 10, paGrade: "F", bm2: 25, bmGrade: "F", sej2: 40, sejGrade: "C", pp2: "", ppGrade: "F"},
+            {id: 13, name: "NUR SYIRA BINTI ABDULLAH", class: "TOLKIEN", pa2: 17, paGrade: "F", bm2: 32, bmGrade: "D", sej2: 42, sejGrade: "C", pp2: "", ppGrade: "F"},
+            {id: 14, name: "PATRICIA LAMAT ANAK UGAP", class: "TOLKIEN", pa2: 7, paGrade: "F", bm2: 24, bmGrade: "F", sej2: 28, sejGrade: "F", pp2: "", ppGrade: "F"},
+            {id: 15, name: "PRISCILLA NUR ANAK DENIS", class: "TOLKIEN", pa2: 47, paGrade: "C+", bm2: 45, bmGrade: "C", sej2: 65, sejGrade: "B+", pp2: "", ppGrade: "F"},
+            {id: 16, name: "RIQUELME DANIEL ANAK LAWRENCE", class: "TOLKIEN", pa2: 22, paGrade: "F", bm2: 25, bmGrade: "F", sej2: 18, sejGrade: "F", pp2: "", ppGrade: "F"},
+            {id: 17, name: "STEPFINA SUBUN ANAK JERRY", class: "TOLKIEN", pa2: 58, paGrade: "B", bm2: 57, bmGrade: "B-", sej2: 45, sejGrade: "C", pp2: "", ppGrade: "F"},
+            {id: 18, name: "STERRYLIN ANAK INTAN", class: "TOLKIEN", pa2: 7, paGrade: "F", bm2: 23, bmGrade: "F", sej2: 22, sejGrade: "F", pp2: "", ppGrade: "F"},
+            {id: 19, name: "SYAHRIZWAN AZIZI BIN ZAMRI", class: "TOLKIEN", pa2: 10, paGrade: "F", bm2: 32, bmGrade: "D", sej2: 42, sejGrade: "C", pp2: "", ppGrade: "F"},
+            {id: 20, name: "SYAIDATUL SOFEA BINTI ABDUL KAMAL", class: "TOLKIEN", pa2: 17, paGrade: "F", bm2: 23, bmGrade: "F", sej2: 32, sejGrade: "D", pp2: "", ppGrade: "F"},
+            {id: 21, name: "AFFENDI BIN ABDULLAH HAMLI", class: "ROWLING", pa2: 25, paGrade: "F", bm2: 32, bmGrade: "D", sej2: 48, sejGrade: "C+", pp2: "", ppGrade: "F"},
+            {id: 22, name: "AMOS ANDING ANAK ELEYIS", class: "ROWLING", pa2: 33, paGrade: "D", bm2: 23, bmGrade: "F", sej2: 30, sejGrade: "F", pp2: "", ppGrade: "F"},
+            {id: 23, name: "CLARINDA VLYNSIE ANAK JAMES", class: "ROWLING", pa2: 8, paGrade: "F", bm2: 23, bmGrade: "F", sej2: 7, sejGrade: "F", pp2: "", ppGrade: "F"},
+            {id: 24, name: "CLARYSSA ENGSINGAN ANAK REDMAIL", class: "ROWLING", pa2: 21, paGrade: "F", bm2: 18, bmGrade: "F", sej2: 23, sejGrade: "F", pp2: "", ppGrade: "F"},
+            {id: 25, name: "DEWALSAN KUYA", class: "ROWLING", pa2: 36, paGrade: "D+", bm2: 18, bmGrade: "F", sej2: 23, sejGrade: "F", pp2: "", ppGrade: "F"},
+            {id: 26, name: "DINANG GWENIERVIER ANAK LAWRENCE", class: "ROWLING", pa2: 1, paGrade: "F", bm2: 1, bmGrade: "F", sej2: "TH", sejGrade: "#N/A", pp2: "", ppGrade: "F"},
+            {id: 27, name: "ELMANIA TISOK ANAK CHRISTINA", class: "ROWLING", pa2: 53, paGrade: "B-", bm2: 22, bmGrade: "F", sej2: 25, sejGrade: "F", pp2: "", ppGrade: "F"},
+            {id: 28, name: "JOANNES NYAMIE ANAK GAWAI", class: "ROWLING", pa2: 43, paGrade: "C", bm2: 57, bmGrade: "B-", sej2: 73, sejGrade: "A-", pp2: "", ppGrade: "F"},
+            {id: 29, name: "MACLERAN ABING ANAK ENTILI", class: "ROWLING", pa2: 23, paGrade: "F", bm2: 18, bmGrade: "F", sej2: 10, sejGrade: "F", pp2: "", ppGrade: "F"},
+            {id: 30, name: "MELYINDA NICOLE NYASI ANAK BETI", class: "ROWLING", pa2: 38, paGrade: "C-", bm2: 57, bmGrade: "B-", sej2: 57, sejGrade: "B-", pp2: "", ppGrade: "F"},
+            {id: 31, name: "MOHAMAD FARID BIN MOHAMAD IBRAHIM", class: "ROWLING", pa2: 58, paGrade: "B", bm2: 60, bmGrade: "B", sej2: 30, sejGrade: "F", pp2: "", ppGrade: "F"},
+            {id: 32, name: "NADA NAZURAH BINTI JEFRI", class: "ROWLING", pa2: 21, paGrade: "F", bm2: 20, bmGrade: "F", sej2: 28, sejGrade: "F", pp2: "", ppGrade: "F"},
+            {id: 33, name: "NADIA NYALA ANAK SERIT", class: "ROWLING", pa2: 38, paGrade: "C-", bm2: 32, bmGrade: "D", sej2: 20, sejGrade: "F", pp2: "", ppGrade: "F"},
+            {id: 34, name: "NUR LANY SHAZRYEN BINTI ABDULLAH", class: "ROWLING", pa2: 60, paGrade: "B", bm2: 35, bmGrade: "D+", sej2: 42, sejGrade: "C", pp2: "", ppGrade: "F"},
+            {id: 35, name: "NUR SHASMEEN BINTI SAFRY", class: "ROWLING", pa2: 51, paGrade: "C+", bm2: 28, bmGrade: "F", sej2: 20, sejGrade: "F", pp2: "", ppGrade: "F"},
+            {id: 36, name: "NURMAZIATUL AKHMA BINTI ASZMAN", class: "ROWLING", pa2: 25, paGrade: "F", bm2: 23, bmGrade: "F", sej2: 15, sejGrade: "F", pp2: "", ppGrade: "F"},
+            {id: 37, name: "NURUL ASYIKIN BINTI SENARI", class: "ROWLING", pa2: 30, paGrade: "F", bm2: 37, bmGrade: "C-", sej2: 23, sejGrade: "F", pp2: "", ppGrade: "F"},
+            {id: 38, name: "NUUR EIZZAHTUL QADIRAH BINTI MOHAMAD SUPIAN", class: "ROWLING", pa2: 51, paGrade: "C+", bm2: 48, bmGrade: "C+", sej2: 70, sejGrade: "A-", pp2: "", ppGrade: "F"},
+            {id: 39, name: "NUUR EIZZATI QADIRAH BINTI MOHAMAD SUPIAN", class: "ROWLING", pa2: 63, paGrade: "B", bm2: 50, bmGrade: "C+", sej2: 63, sejGrade: "B", pp2: "", ppGrade: "F"},
+            {id: 40, name: "RAPHEAL CYPRIAN ANAK ANDY", class: "ROWLING", pa2: 18, paGrade: "F", bm2: 15, bmGrade: "F", sej2: 10, sejGrade: "F", pp2: "", ppGrade: "F"},
+            {id: 41, name: "RONALD DANIEL ANAK BELAJA", class: "ROWLING", pa2: 23, paGrade: "F", bm2: 28, bmGrade: "F", sej2: 17, sejGrade: "F", pp2: "", ppGrade: "F"},
+            {id: 42, name: "AHMAD ASRAF BIN SUNNI", class: "HARLAND", pa2: 15, paGrade: "F", bm2: 37, bmGrade: "C-", sej2: 3, sejGrade: "F", pp2: "18", ppGrade: "F"},
+            {id: 43, name: "ALLYSIA LIMAU ANAK DAGANG", class: "HARLAND", pa2: 10, paGrade: "F", bm2: 32, bmGrade: "D", sej2: 37, sejGrade: "C-", pp2: "50", ppGrade: "C+"},
+            {id: 44, name: "ALYNE ANAK UMPIN", class: "HARLAND", pa2: 18, paGrade: "F", bm2: 47, bmGrade: "C+", sej2: 52, sejGrade: "B-", pp2: "53", ppGrade: "B-"},
+            {id: 45, name: "ANGELINA NIA ANAK KOMPENI", class: "HARLAND", pa2: 15, paGrade: "F", bm2: 40, bmGrade: "C", sej2: 58, sejGrade: "B", pp2: "23", ppGrade: "F"},
+            {id: 46, name: "DERRICK GOH TZE SAN", class: "HARLAND", pa2: 13, paGrade: "F", bm2: 25, bmGrade: "F", sej2: 27, sejGrade: "F", pp2: "33", ppGrade: "D"},
+            {id: 47, name: "DIXION DANNY ANAK GITAH", class: "HARLAND", pa2: 28, paGrade: "F", bm2: 42, bmGrade: "C", sej2: 13, sejGrade: "F", pp2: "35", ppGrade: "D+"},
+            {id: 48, name: "ELISIA ANAK AMUL", class: "HARLAND", pa2: 28, paGrade: "F", bm2: 57, bmGrade: "B-", sej2: 42, sejGrade: "C", pp2: "48", ppGrade: "C+"},
+            {id: 49, name: "EMOSLYNE BRAINE ANAK CHUNDANG", class: "HARLAND", pa2: 33, paGrade: "D", bm2: 22, bmGrade: "F", sej2: 10, sejGrade: "F", pp2: "46", ppGrade: "C+"},
+            {id: 50, name: "EVA LEA ANAK JAMES NGUMBANG", class: "HARLAND", pa2: 12, paGrade: "F", bm2: 32, bmGrade: "D", sej2: 32, sejGrade: "D", pp2: "22", ppGrade: "F"},
+            {id: 51, name: "FIELDALLYS ANAK BANTAN", class: "HARLAND", pa2: 57, paGrade: "B-", bm2: 35, bmGrade: "D+", sej2: 42, sejGrade: "C", pp2: "23", ppGrade: "F"},
+            {id: 52, name: "FRANSISCA INGA ANAK TONY", class: "HARLAND", pa2: 27, paGrade: "F", bm2: 45, bmGrade: "C", sej2: 42, sejGrade: "C", pp2: "33", ppGrade: "D"},
+            {id: 53, name: "MARSYA BINTI OMAR", class: "HARLAND", pa2: 12, paGrade: "F", bm2: 45, bmGrade: "C", sej2: 78, sejGrade: "A-", pp2: "44", ppGrade: "C"},
+            {id: 54, name: "NAJWA WAHEDATUL SYIFAA BINTI YUSLAN", class: "HARLAND", pa2: 15, paGrade: "F", bm2: 32, bmGrade: "D", sej2: 50, sejGrade: "C+", pp2: "28", ppGrade: "F"},
+            {id: 55, name: "NUR FAZILA BINTI ABDUL RAJAK", class: "HARLAND", pa2: 7, paGrade: "F", bm2: 15, bmGrade: "F", sej2: 5, sejGrade: "F", pp2: "18", ppGrade: "F"},
+            {id: 56, name: "NUR SURAYA SHAFIQA BINTI ZAMANI", class: "HARLAND", pa2: 23, paGrade: "F", bm2: 32, bmGrade: "D", sej2: 8, sejGrade: "F", pp2: "16", ppGrade: "F"}
+        ];
+
+        // Function to populate tables
+        function populateTables() {
+            // All students table
+            const allStudentsTable = document.getElementById('allStudentsTable');
+            allStudentsTable.innerHTML = '';
+            
+            studentsData.forEach((student, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${student.name}</td>
+                    <td>${student.class}</td>
+                    <td>${student.pa2}</td>
+                    <td><span class="grade-badge grade-${student.paGrade}">${student.paGrade}</span></td>
+                    <td>${student.bm2}</td>
+                    <td><span class="grade-badge grade-${student.bmGrade}">${student.bmGrade}</span></td>
+                    <td>${student.sej2}</td>
+                    <td><span class="grade-badge grade-${student.sejGrade}">${student.sejGrade}</span></td>
+                    <td>${student.pp2}</td>
+                    <td><span class="grade-badge grade-${student.ppGrade}">${student.ppGrade}</span></td>
+                `;
+                allStudentsTable.appendChild(row);
+            });
+
+            // Tolkien students table
+            const tolkienStudents = studentsData.filter(student => student.class === 'TOLKIEN');
+            const tolkienStudentsTable = document.getElementById('tolkienStudentsTable');
+            tolkienStudentsTable.innerHTML = '';
+            
+            tolkienStudents.forEach((student, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${student.name}</td>
+                    <td>${student.pa2}</td>
+                    <td><span class="grade-badge grade-${student.paGrade}">${student.paGrade}</span></td>
+                    <td>${student.bm2}</td>
+                    <td><span class="grade-badge grade-${student.bmGrade}">${student.bmGrade}</span></td>
+                    <td>${student.sej2}</td>
+                    <td><span class="grade-badge grade-${student.sejGrade}">${student.sejGrade}</span></td>
+                    <td>${student.pp2}</td>
+                    <td><span class="grade-badge grade-${student.ppGrade}">${student.ppGrade}</span></td>
+                `;
+                tolkienStudentsTable.appendChild(row);
+            });
+
+            // Rowling students table
+            const rowlingStudents = studentsData.filter(student => student.class === 'ROWLING');
+            const rowlingStudentsTable = document.getElementById('rowlingStudentsTable');
+            rowlingStudentsTable.innerHTML = '';
+            
+            rowlingStudents.forEach((student, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${student.name}</td>
+                    <td>${student.pa2}</td>
+                    <td><span class="grade-badge grade-${student.paGrade}">${student.paGrade}</span></td>
+                    <td>${student.bm2}</td>
+                    <td><span class="grade-badge grade-${student.bmGrade}">${student.bmGrade}</span></td>
+                    <td>${student.sej2}</td>
+                    <td><span class="grade-badge grade-${student.sejGrade}">${student.sejGrade}</span></td>
+                    <td>${student.pp2}</td>
+                    <td><span class="grade-badge grade-${student.ppGrade}">${student.ppGrade}</span></td>
+                `;
+                rowlingStudentsTable.appendChild(row);
+            });
+
+            // Harland students table
+            const harlandStudents = studentsData.filter(student => student.class === 'HARLAND');
+            const harlandStudentsTable = document.getElementById('harlandStudentsTable');
+            harlandStudentsTable.innerHTML = '';
+            
+            harlandStudents.forEach((student, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${student.name}</td>
+                    <td>${student.pa2}</td>
+                    <td><span class="grade-badge grade-${student.paGrade}">${student.paGrade}</span></td>
+                    <td>${student.bm2}</td>
+                    <td><span class="grade-badge grade-${student.bmGrade}">${student.bmGrade}</span></td>
+                    <td>${student.sej2}</td>
+                    <td><span class="grade-badge grade-${student.sejGrade}">${student.sejGrade}</span></td>
+                    <td>${student.pp2}</td>
+                    <td><span class="grade-badge grade-${student.ppGrade}">${student.ppGrade}</span></td>
+                `;
+                harlandStudentsTable.appendChild(row);
+            });
+        }
+
+        // Function to create charts
+        function createCharts() {
+            // Count grades for PA2
+            const paGrades = {
+                'A': 0, 'A-': 0, 'B+': 0, 'B': 0, 'B-': 0, 
+                'C+': 0, 'C': 0, 'C-': 0, 'D+': 0, 'D': 0, 'F': 0
+            };
+            
+            studentsData.forEach(student => {
+                if (paGrades.hasOwnProperty(student.paGrade)) {
+                    paGrades[student.paGrade]++;
+                }
+            });
+
+            // Count grades for BM2
+            const bmGrades = {
+                'A': 0, 'A-': 0, 'B+': 0, 'B': 0, 'B-': 0, 
+                'C+': 0, 'C': 0, 'C-': 0, 'D+': 0, 'D': 0, 'F': 0
+            };
+            
+            studentsData.forEach(student => {
+                if (bmGrades.hasOwnProperty(student.bmGrade)) {
+                    bmGrades[student.bmGrade]++;
+                }
+            });
+
+            // Count grades for SEJ2
+            const sejGrades = {
+                'A': 0, 'A-': 0, 'B+': 0, 'B': 0, 'B-': 0, 
+                'C+': 0, 'C': 0, 'C-': 0, 'D+': 0, 'D': 0, 'F': 0
+            };
+            
+            studentsData.forEach(student => {
+                if (sejGrades.hasOwnProperty(student.sejGrade)) {
+                    sejGrades[student.sejGrade]++;
+                }
+            });
+
+            // PA2 Grade Chart
+            const paCtx = document.getElementById('paGradeChart').getContext('2d');
+            new Chart(paCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(paGrades),
+                    datasets: [{
+                        label: 'Jumlah Pelajar',
+                        data: Object.values(paGrades),
+                        backgroundColor: [
+                            '#10B981', '#10B981', // A, A-
+                            '#3B82F6', '#3B82F6', '#3B82F6', // B+, B, B-
+                            '#6366F1', '#6366F1', '#6366F1', // C+, C, C-
+                            '#F59E0B', '#F59E0B', // D+, D
+                            '#EF4444' // F
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+
+            // BM2 Grade Chart
+            const bmCtx = document.getElementById('bmGradeChart').getContext('2d');
+            new Chart(bmCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(bmGrades),
+                    datasets: [{
+                        label: 'Jumlah Pelajar',
+                        data: Object.values(bmGrades),
+                        backgroundColor: [
+                            '#10B981', '#10B981', // A, A-
+                            '#3B82F6', '#3B82F6', '#3B82F6', // B+, B, B-
+                            '#6366F1', '#6366F1', '#6366F1', // C+, C, C-
+                            '#F59E0B', '#F59E0B', // D+, D
+                            '#EF4444' // F
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+
+            // SEJ2 Grade Chart
+            const sejCtx = document.getElementById('sejGradeChart').getContext('2d');
+            new Chart(sejCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(sejGrades),
+                    datasets: [{
+                        label: 'Jumlah Pelajar',
+                        data: Object.values(sejGrades),
+                        backgroundColor: [
+                            '#10B981', '#10B981', // A, A-
+                            '#3B82F6', '#3B82F6', '#3B82F6', // B+, B, B-
+                            '#6366F1', '#6366F1', '#6366F1', // C+, C, C-
+                            '#F59E0B', '#F59E0B', // D+, D
+                            '#EF4444' // F
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Class Comparison Chart
+            const classData = {
+                'TOLKIEN': { pass: 0, fail: 0 },
+                'ROWLING': { pass: 0, fail: 0 },
+                'HARLAND': { pass: 0, fail: 0 }
+            };
+
+            studentsData.forEach(student => {
+                if (student.paGrade !== 'F' || student.bmGrade !== 'F' || student.sejGrade !== 'F') {
+                    classData[student.class].pass++;
+                } else {
+                    classData[student.class].fail++;
+                }
+            });
+
+            const classCtx = document.getElementById('classComparisonChart').getContext('2d');
+            new Chart(classCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(classData),
+                    datasets: [
+                        {
+                            label: 'Lulus',
+                            data: Object.values(classData).map(d => d.pass),
+                            backgroundColor: '#10B981',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Gagal',
+                            data: Object.values(classData).map(d => d.fail),
+                            backgroundColor: '#EF4444',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        },
+                        x: {
+                            stacked: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // Tab functionality
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons and content
+                document.querySelectorAll('.tab-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // Add active class to clicked button and corresponding content
+                button.classList.add('active');
+                document.getElementById(`${button.dataset.tab}-tab`).classList.add('active');
+            });
+        });
+
+        // Class filter functionality
+        document.getElementById('classFilter').addEventListener('change', function() {
+            const selectedClass = this.value;
+            const rows = document.querySelectorAll('#allStudentsTable tr');
+            
+            rows.forEach(row => {
+                const classCell = row.querySelector('td:nth-child(3)');
+                if (classCell) {
+                    if (selectedClass === 'all' || classCell.textContent === selectedClass) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+        });
+
+        // Calculate statistics
+        function calculateStatistics() {
+            // Total students
+            document.getElementById('totalStudents').textContent = studentsData.length;
+            
+            // Pass rates
+            const paPassCount = studentsData.filter(student => student.paGrade !== 'F').length;
+            const bmPassCount = studentsData.filter(student => student.bmGrade !== 'F').length;
+            const sejPassCount = studentsData.filter(student => student.sejGrade !== 'F').length;
+            
+            const paPassRate = (paPassCount / studentsData.length * 100).toFixed(1);
+            const bmPassRate = (bmPassCount / studentsData.length * 100).toFixed(1);
+            const sejPassRate = (sejPassCount / studentsData.length * 100).toFixed(1);
+            
+            document.getElementById('passRatePA').textContent = `${paPassRate}%`;
+            document.getElementById('passRateBM').textContent = `${bmPassRate}%`;
+            document.getElementById('passRateSEJ').textContent = `${sejPassRate}%`;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            populateTables();
+            createCharts();
+            calculateStatistics();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'967277b8b107a859',t:'MTc1Mzg1MzQ2NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
+<!-- partial -->
+  
+</body>
+</html>
