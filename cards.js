@@ -1,0 +1,10 @@
+/* Kad contoh boleh diurus melalui menu Urus Kad. */
+const DEFAULT_CARDS = {
+ chance:[
+ ['Mara terus ke MULA dan terima bonus.','moveStart',200],['Pergi terus ke Penjara Akademik.','jail',0],['Undur tiga petak kerana tersalah fakta.','move',-3],['Esei cemerlang! Terima 150 Koin Sejarah.','coins',150],['Lewat menghantar tugasan. Bayar 100 Koin Sejarah.','coins',-100],['Bergerak ke petak Bab 1 terdekat.','nearest','bab1'],['Bergerak ke petak Bab 2 terdekat.','nearest','bab2'],['Bergerak ke petak Bab 3 terdekat.','nearest','bab3'],['Peluang tambahan: ambil satu lagi giliran.','extra',0],['Terima Kad Bebas Penjara.','jailCard',0],['Bayar setiap pemain 50 Koin Sejarah.','payEach',50],['Maju lima petak.','move',5],['Terima bonus penyelidikan 200 Koin Sejarah.','coins',200],['Bayar kos penyelenggaraan bangunan.','buildCost',25],['Ditemui manuskrip! Terima 75 Koin Sejarah.','coins',75],['Undur dua petak untuk semak fakta.','move',-2]
+ ],
+ community:[
+ ['Menang pertandingan esei. Terima 200 Koin Sejarah.','coins',200],['Bantuan pembelian buku: terima 100 Koin Sejarah.','coins',100],['Bayar kos bahan pembelajaran 50 Koin Sejarah.','coins',-50],['Setiap pemain membayar anda 20 Koin Sejarah.','collectEach',20],['Terima dividen pendidikan 50 Koin Sejarah.','coins',50],['Bayar yuran peperiksaan 100 Koin Sejarah.','coins',-100],['Terima Kad Bebas Penjara.','jailCard',0],['Kutip 50 Koin Sejarah daripada setiap pemain.','collectEach',50],['Bayar 25 Koin bagi setiap Rumah Ilmu.','buildCost',25],['Bayar 100 Koin bagi setiap Akademi Sejarah.','hotelCost',100],['Kehadiran penuh: terima 100 Koin Sejarah.','coins',100],['Sumbangan alumni: terima 150 Koin Sejarah.','coins',150],['Bayar kos mencetak nota 50 Koin Sejarah.','coins',-50],['Bonus pembentangan: terima 100 Koin Sejarah.','coins',100],['Denda kehilangan buku 50 Koin Sejarah.','coins',-50],['Hadiah guru: terima 50 Koin Sejarah.','coins',50]
+ ]
+};
+Object.keys(DEFAULT_CARDS).forEach(k=>DEFAULT_CARDS[k]=DEFAULT_CARDS[k].map((c,i)=>({id:`${k}${i+1}`,text:c[0],effect:c[1],value:c[2],active:true,type:k})));
